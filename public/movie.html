@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeleTV - Movie Detail</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0d1117; color: #ffffff; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <header class="flex justify-between items-center p-4 border-b border-gray-800 bg-gray-900">
+        <a href="index.html" class="text-2xl font-bold flex items-center gap-2 text-blue-500">
+            <i class="fas fa-arrow-left text-lg text-white mr-2"></i> TeleTV
+        </a>
+    </header>
+
+    <div id="detail-container" class="max-w-xl mx-auto p-4">
+        <p class="text-center text-gray-400 py-20">Loading movie details...</p>
+    </div>
+
+    <script>
+        async def fetchMovieDetail() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const slug = urlParams.get('id');
+            
+            if (!slug) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/movies/${slug}`);
+                if (!response.ok) throw new Error("Movie not found");
+                const movie = await response.json();
+                
+                document.title = `TeleTV - ${movie.title}`;
+                const container = document.getElementById('detail-container');
+                
+                container.innerHTML = `
+                    <div class="w-full max-h-[400px] overflow-hidden rounded-xl mb-4 shadow-xl border border-gray-800">
+                        <img src="${movie.poster_url}" alt="Poster" class="w-full h-full object-cover opacity-90">
+                    </div>
+                    
+                    <h1 class="text-2xl font-bold mb-2">${movie.title}</h1>
+                    
+                    <div class="flex items-center gap-4 text-gray-400 text-sm mb-6 bg-gray-900 p-3 rounded-lg border border-gray-800">
+                        <span><i class="far fa-calendar text-blue-500"></i> ${movie.year}</span>
+                        <span><i class="fas fa-star text-yellow-500"></i> ${movie.rating}</span>
+                        <span><i class="fas fa-closed-captioning text-green-500"></i> Subtitles</span>
+                    </div>
+
+                    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6 shadow-md text-center">
+                        <h2 class="text-lg font-bold mb-1">Watch Options</h2>
+                        <p class="text-gray-400 text-xs mb-4">Watch or download the full movie on Telegram directly.</p>
+                        <a href="${movie.telegram_link}" target="_blank" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg inline-flex justify-center items-center gap-2 shadow-lg transition duration-200">
+                            <i class="fab fa-telegram-plane text-lg"></i> Watch Now
+                        </a>
+                    </div>
+
+                    <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-800">
+                        <h2 class="text-md font-bold mb-2 text-blue-400 border-b border-gray-800 pb-2">Review & Synopsis</h2>
+                        <p class="text-gray-300 leading-relaxed text-sm whitespace-pre-line">${movie.description}</p>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('detail-container').innerHTML = '<p class="text-red-500 text-center py-20">Movie not found or error loading.</p>';
+            }
+        }
+
+        fetchMovieDetail();
+    </script>
+</body>
+</html>
